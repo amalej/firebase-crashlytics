@@ -1,4 +1,4 @@
-# Firebase Crashlytics
+# Firebase Crashlytics [![npm](https://img.shields.io/npm/v/firebase-crashlytics)](https://www.npmjs.com/package/firebase-crashlytics) [![npm](https://img.shields.io/npm/dt/firebase-crashlytics)](https://www.npmjs.com/package/firebase-crashlytics?activeTab=versions)
 
 This is a library which uses the [Firebase Crashlytics REST API](https://firebase.google.com/docs/reference/crashlytics/rest) to delete crash reports of specific users.
 
@@ -8,6 +8,14 @@ This is a library which uses the [Firebase Crashlytics REST API](https://firebas
    1. `Firebase Crashlytics Admin` role should suffice.
 
 ## How to use
+
+### Installation
+
+```
+npm i firebase-crashlytics
+```
+
+### Code example
 
 ```js
 const firebaseCrashlytics = new FirebaseCrashlytics({
@@ -41,7 +49,7 @@ Just provide the path to your `service-account` file
 
 ```js
 const firebaseCrashlytics = new FirebaseCrashlytics({
-  serviceAccountPath: "./service-account.json",
+  keyFile: "./service-account.json",
 });
 ```
 
