@@ -1,0 +1,3 @@
+# Output and dependencies
+node_modules
+dist/
