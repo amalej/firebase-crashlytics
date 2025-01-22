@@ -5,7 +5,9 @@ This is a library which uses the [Firebase Crashlytics REST API](https://firebas
 ## Pre-requisites
 
 1. A service account with permission to access the API.
-   1. `Firebase Crashlytics Admin` role should suffice.
+   - `Firebase Crashlytics Admin` role should suffice.
+2. The Firebase Crashlytics API should be enabled on your project
+   - Visit https://console.cloud.google.com/apis/library/firebasecrashlytics.googleapis.com?project=PROJECT_ID to enable
 
 ## How to use
 
