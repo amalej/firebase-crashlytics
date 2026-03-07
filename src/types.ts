@@ -5,13 +5,6 @@ export interface FirebaseCrashlyticsAuthOptions extends Omit<
   "scopes"
 > {}
 
-export type ErrorMessage =
-  | "Requested entity was not found."
-  | "The caller does not have permission"
-  | string;
-
-export type ErrorStatus = "NOT_FOUND" | "PERMISSION_DENIED" | string;
-
 export interface DeleteCrashreportsParams {
   projectId: string;
   appId: string;
