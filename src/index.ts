@@ -1,29 +1,13 @@
-import { GoogleAuth, GoogleAuthOptions } from "google-auth-library";
-
-interface DeleteCrashreportsParams {
-  projectId: string;
-  appId: string;
-  userId: string;
-}
-
-interface FirebaseCrashlyticsAuthOptions
-  extends Omit<GoogleAuthOptions, "scopes"> {}
-
-type ErrorMessage =
-  | "Requested entity was not found."
-  | "The caller does not have permission"
-  | string;
-
-type ErrorStatus = "NOT_FOUND" | "PERMISSION_DENIED" | string;
-
-interface DeleteCrashReportResponse {
-  targetCompleteTime?: string;
-  error?: {
-    code: number;
-    message: ErrorMessage;
-    status: ErrorStatus;
-  };
-}
+import { GoogleAuth } from "google-auth-library";
+import {
+  DeleteCrashReportResponse,
+  DeleteCrashreportsParams,
+  FirebaseCrashlyticsAuthOptions,
+  GetIssueParams,
+  Issue,
+  UpdateIssueParams,
+  UpdateIssueResponse,
+} from "./types";
 
 const CRASHLYTICS_ENDPOINT = "https://firebasecrashlytics.googleapis.com";
 const ENDPOINT_VERSION = "v1alpha";
@@ -52,7 +36,7 @@ export class FirebaseCrashlytics {
   }
 
   async deleteCrashReport(
-    params: DeleteCrashreportsParams
+    params: DeleteCrashreportsParams,
   ): Promise<DeleteCrashReportResponse> {
     if (this.accessToken === null || this.accessToken === undefined) {
       this.accessToken = await this.#getAccessToken();
@@ -64,9 +48,54 @@ export class FirebaseCrashlytics {
         method: "DELETE",
         headers: {
           authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
+
+    const textContent = await response.text();
+    return JSON.parse(textContent);
+  }
+
+  async getIssue(params: GetIssueParams): Promise<Issue> {
+    if (this.accessToken === null || this.accessToken === undefined) {
+      this.accessToken = await this.#getAccessToken();
+    }
+
+    const response = await fetch(
+      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}`,
+      {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    const textContent = await response.text();
+    return JSON.parse(textContent);
+  }
+
+  async updateIssue(params: UpdateIssueParams): Promise<UpdateIssueResponse> {
+    if (this.accessToken === null || this.accessToken === undefined) {
+      this.accessToken = await this.#getAccessToken();
+    }
+
+    const url = new URL(
+      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}`,
+    );
+    url.searchParams.append("updateMask", "state");
+    const response = await fetch(url.toString(), {
+      method: "PATCH",
+      headers: {
+        authorization: `Bearer ${this.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        state: params.issueState,
+      }),
+    });
 
     const textContent = await response.text();
     return JSON.parse(textContent);
