@@ -5,6 +5,8 @@ import {
   FirebaseCrashlyticsAuthOptions,
   GetIssueParams,
   Issue,
+  UpdateIssueParams,
+  UpdateIssueResponse,
 } from "./types";
 
 const CRASHLYTICS_ENDPOINT = "https://firebasecrashlytics.googleapis.com";
@@ -70,6 +72,30 @@ export class FirebaseCrashlytics {
         },
       },
     );
+
+    const textContent = await response.text();
+    return JSON.parse(textContent);
+  }
+
+  async updateIssue(params: UpdateIssueParams): Promise<UpdateIssueResponse> {
+    if (this.accessToken === null || this.accessToken === undefined) {
+      this.accessToken = await this.#getAccessToken();
+    }
+
+    const url = new URL(
+      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}`,
+    );
+    url.searchParams.append("updateMask", "state");
+    const response = await fetch(url.toString(), {
+      method: "PATCH",
+      headers: {
+        authorization: `Bearer ${this.accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        state: params.issueState,
+      }),
+    });
 
     const textContent = await response.text();
     return JSON.parse(textContent);

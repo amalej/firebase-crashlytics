@@ -19,12 +19,7 @@ export interface DeleteCrashreportsParams {
 }
 
 export interface DeleteCrashReportResponse {
-  targetCompleteTime?: string;
-  error?: {
-    code: number;
-    message: ErrorMessage;
-    status: ErrorStatus;
-  };
+  targetCompleteTime: string;
 }
 
 export interface GetIssueParams {
@@ -38,6 +33,11 @@ export interface UpdateIssueParams {
   appId: string;
   issueId: string;
   issueState: State;
+}
+
+export interface UpdateIssueResponse {
+  state?: State;
+  name: string;
 }
 
 // Most of the types in this file is from https://github.com/firebase/firebase-tools/blob/main/src/crashlytics/types.ts
