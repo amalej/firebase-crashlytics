@@ -1,3 +1,5 @@
 # Output and dependencies
 node_modules
 lib/
+
+.local-testing
