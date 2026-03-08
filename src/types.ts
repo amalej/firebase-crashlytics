@@ -33,6 +33,32 @@ export interface UpdateIssueResponse {
   name: string;
 }
 
+export interface CreateNoteParams {
+  projectId: string;
+  appId: string;
+  issueId: string;
+  note: string;
+}
+
+export interface ListNoteParams {
+  projectId: string;
+  appId: string;
+  issueId: string;
+  pageSize?: number;
+}
+
+export interface ListNotesResponse {
+  notes: Note[];
+  nextPageToken?: string;
+}
+
+export interface DeleteNoteParams {
+  projectId: string;
+  appId: string;
+  issueId: string;
+  noteId: string;
+}
+
 // Most of the types in this file is from https://github.com/firebase/firebase-tools/blob/main/src/crashlytics/types.ts
 
 export interface Issue {
@@ -82,4 +108,11 @@ export enum State {
   OPEN = "OPEN",
   CLOSED = "CLOSED",
   MUTED = "MUTED",
+}
+
+export interface Note {
+  name?: string;
+  createTime?: string;
+  author?: string;
+  body?: string;
 }

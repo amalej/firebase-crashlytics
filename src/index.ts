@@ -1,10 +1,15 @@
 import { GoogleAuth } from "google-auth-library";
 import {
+  CreateNoteParams,
   DeleteCrashReportResponse,
   DeleteCrashreportsParams,
+  DeleteNoteParams,
   FirebaseCrashlyticsAuthOptions,
   GetIssueParams,
   Issue,
+  ListNoteParams,
+  ListNotesResponse,
+  Note,
   UpdateIssueParams,
   UpdateIssueResponse,
 } from "./types";
@@ -96,6 +101,70 @@ export class FirebaseCrashlytics {
         state: params.issueState,
       }),
     });
+
+    const textContent = await response.text();
+    return JSON.parse(textContent);
+  }
+
+  async createNote(params: CreateNoteParams): Promise<Note> {
+    if (this.accessToken === null || this.accessToken === undefined) {
+      this.accessToken = await this.#getAccessToken();
+    }
+
+    const response = await fetch(
+      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}/notes`,
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          body: params.note,
+        }),
+      },
+    );
+
+    const textContent = await response.text();
+    return JSON.parse(textContent);
+  }
+
+  async listNotes(params: ListNoteParams): Promise<ListNotesResponse> {
+    if (this.accessToken === null || this.accessToken === undefined) {
+      this.accessToken = await this.#getAccessToken();
+    }
+
+    const url = new URL(
+      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}/notes`,
+    );
+    url.searchParams.append("pageSize", params.pageSize?.toString() ?? "20");
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${this.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const textContent = await response.text();
+    return JSON.parse(textContent);
+  }
+
+  async deleteNote(params: DeleteNoteParams): Promise<{}> {
+    if (this.accessToken === null || this.accessToken === undefined) {
+      this.accessToken = await this.#getAccessToken();
+    }
+
+    const response = await fetch(
+      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}/notes/${params.noteId}`,
+      {
+        method: "DELETE",
+        headers: {
+          authorization: `Bearer ${this.accessToken}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
     const textContent = await response.text();
     return JSON.parse(textContent);
