@@ -17,6 +17,10 @@
   "files": [
     "lib"
   ],
+  "exports": {
+    ".": "./lib/index.js",
+    "./*.js": "./lib/*.js"
+  },
   "keywords": [
     "firebase",
     "crashlytics",

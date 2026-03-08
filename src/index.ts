@@ -1,36 +1,47 @@
 import { GoogleAuth } from "google-auth-library";
-import {
-  CreateNoteParams,
-  DeleteCrashReportResponse,
-  DeleteCrashreportsParams,
-  DeleteNoteParams,
-  FirebaseCrashlyticsAuthOptions,
-  GetIssueParams,
-  Issue,
-  ListNoteParams,
-  ListNotesResponse,
-  Note,
-  UpdateIssueParams,
-  UpdateIssueResponse,
-} from "./types";
-
-const CRASHLYTICS_ENDPOINT = "https://firebasecrashlytics.googleapis.com";
-const ENDPOINT_VERSION = "v1alpha";
-const AUTH_SCOPES = [
-  "https://www.googleapis.com/auth/cloud-platform",
-  "https://www.googleapis.com/auth/firebase",
-];
+import { FirebaseCrashlyticsAuthOptions } from "./types";
+import { AUTH_SCOPES } from "./utils";
 
 export class FirebaseCrashlytics {
-  private googleAuthOptions: FirebaseCrashlyticsAuthOptions;
-  private accessToken: string | null | undefined;
-  constructor(googleAuthOptions: FirebaseCrashlyticsAuthOptions) {
-    this.googleAuthOptions = googleAuthOptions;
+  private static _instances: Map<string, FirebaseCrashlytics> = new Map();
+
+  authOptions: FirebaseCrashlyticsAuthOptions;
+  accessToken: string | null = null;
+  projectId: string | null = null;
+
+  private constructor(authOptions: FirebaseCrashlyticsAuthOptions) {
+    this.authOptions = authOptions;
+    this.projectId = authOptions.projectId ?? null;
   }
 
-  async #getAccessToken(): Promise<string> {
+  static get instances() {
+    return FirebaseCrashlytics._instances;
+  }
+
+  static getInstance(
+    authOptions: FirebaseCrashlyticsAuthOptions,
+    name: string = "default",
+  ) {
+    if (!FirebaseCrashlytics._instances.has(name)) {
+      FirebaseCrashlytics._instances.set(
+        name,
+        new FirebaseCrashlytics(authOptions),
+      );
+    }
+    return FirebaseCrashlytics._instances.get(name)!;
+  }
+
+  /**
+   * Get an access token for the instance. If the token is already present, it returns the existing token.
+   * @param force Force refresh the access token. Can be used when the token expires
+   * @returns Access token
+   */
+  public async getAccessToken(force: boolean = false): Promise<string> {
+    if (this.accessToken && !force) {
+      return this.accessToken;
+    }
     const googleAuth = new GoogleAuth({
-      ...this.googleAuthOptions,
+      ...this.authOptions,
       scopes: AUTH_SCOPES,
     });
     const accessToken = await googleAuth.getAccessToken();
@@ -40,133 +51,38 @@ export class FirebaseCrashlytics {
     return accessToken;
   }
 
-  async deleteCrashReport(
-    params: DeleteCrashreportsParams,
-  ): Promise<DeleteCrashReportResponse> {
-    if (this.accessToken === null || this.accessToken === undefined) {
-      this.accessToken = await this.#getAccessToken();
+  public async getProjectId(): Promise<string> {
+    if (this.projectId) {
+      return this.projectId;
     }
-
-    const response = await fetch(
-      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/users/${params.userId}/crashReports`,
-      {
-        method: "DELETE",
-        headers: {
-          authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    const textContent = await response.text();
-    return JSON.parse(textContent);
-  }
-
-  async getIssue(params: GetIssueParams): Promise<Issue> {
-    if (this.accessToken === null || this.accessToken === undefined) {
-      this.accessToken = await this.#getAccessToken();
-    }
-
-    const response = await fetch(
-      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}`,
-      {
-        method: "GET",
-        headers: {
-          authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    const textContent = await response.text();
-    return JSON.parse(textContent);
-  }
-
-  async updateIssue(params: UpdateIssueParams): Promise<UpdateIssueResponse> {
-    if (this.accessToken === null || this.accessToken === undefined) {
-      this.accessToken = await this.#getAccessToken();
-    }
-
-    const url = new URL(
-      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}`,
-    );
-    url.searchParams.append("updateMask", "state");
-    const response = await fetch(url.toString(), {
-      method: "PATCH",
-      headers: {
-        authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        state: params.issueState,
-      }),
+    const googleAuth = new GoogleAuth({
+      ...this.authOptions,
+      scopes: AUTH_SCOPES,
     });
-
-    const textContent = await response.text();
-    return JSON.parse(textContent);
-  }
-
-  async createNote(params: CreateNoteParams): Promise<Note> {
-    if (this.accessToken === null || this.accessToken === undefined) {
-      this.accessToken = await this.#getAccessToken();
+    const projectId = await googleAuth.getProjectId();
+    if (!projectId) {
+      throw Error("Could not get project id");
     }
-
-    const response = await fetch(
-      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}/notes`,
-      {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          body: params.note,
-        }),
-      },
-    );
-
-    const textContent = await response.text();
-    return JSON.parse(textContent);
+    return projectId;
   }
 
-  async listNotes(params: ListNoteParams): Promise<ListNotesResponse> {
-    if (this.accessToken === null || this.accessToken === undefined) {
-      this.accessToken = await this.#getAccessToken();
-    }
-
-    const url = new URL(
-      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}/notes`,
-    );
-    url.searchParams.append("pageSize", params.pageSize?.toString() ?? "20");
-    const response = await fetch(url.toString(), {
-      method: "GET",
-      headers: {
-        authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const textContent = await response.text();
-    return JSON.parse(textContent);
+  /**
+   * Deletes the instance with the given name. If the instance does not exist, it does nothing.
+   * @param name Name of the instance
+   * @returns
+   */
+  public delete(name: string) {
+    return FirebaseCrashlytics._instances.delete(name);
   }
+}
 
-  async deleteNote(params: DeleteNoteParams): Promise<{}> {
-    if (this.accessToken === null || this.accessToken === undefined) {
-      this.accessToken = await this.#getAccessToken();
-    }
+export function initialize(
+  googleAuthOptions: FirebaseCrashlyticsAuthOptions,
+  name: string = "default",
+) {
+  return FirebaseCrashlytics.getInstance(googleAuthOptions, name);
+}
 
-    const response = await fetch(
-      `${CRASHLYTICS_ENDPOINT}/${ENDPOINT_VERSION}/projects/${params.projectId}/apps/${params.appId}/issues/${params.issueId}/notes/${params.noteId}`,
-      {
-        method: "DELETE",
-        headers: {
-          authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    const textContent = await response.text();
-    return JSON.parse(textContent);
-  }
+export function listInstances() {
+  return FirebaseCrashlytics.instances;
 }

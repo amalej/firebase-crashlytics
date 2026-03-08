@@ -6,7 +6,6 @@ export interface FirebaseCrashlyticsAuthOptions extends Omit<
 > {}
 
 export interface DeleteCrashreportsParams {
-  projectId: string;
   appId: string;
   userId: string;
 }
@@ -16,13 +15,11 @@ export interface DeleteCrashReportResponse {
 }
 
 export interface GetIssueParams {
-  projectId: string;
   appId: string;
   issueId: string;
 }
 
 export interface UpdateIssueParams {
-  projectId: string;
   appId: string;
   issueId: string;
   issueState: State;
@@ -34,14 +31,12 @@ export interface UpdateIssueResponse {
 }
 
 export interface CreateNoteParams {
-  projectId: string;
   appId: string;
   issueId: string;
   note: string;
 }
 
 export interface ListNoteParams {
-  projectId: string;
   appId: string;
   issueId: string;
   pageSize?: number;
@@ -53,7 +48,6 @@ export interface ListNotesResponse {
 }
 
 export interface DeleteNoteParams {
-  projectId: string;
   appId: string;
   issueId: string;
   noteId: string;
