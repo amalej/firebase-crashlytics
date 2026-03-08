@@ -1,6 +1,6 @@
 {
   "name": "firebase-crashlytics",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Delete crash reports from Firebase Crashlytics",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
