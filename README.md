@@ -19,28 +19,56 @@ npm i firebase-crashlytics
 
 ### Code example
 
-```js
-const firebaseCrashlytics = new FirebaseCrashlytics({
-  keyFile: "./service-account.json",
-});
+```ts
+import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
+import { getIssue } from "firebase-crashlytics/issues";
 
 async function main() {
-  const deleteRequest = await firebaseCrashlytics.deleteCrashReport({
-    projectId: "firebase-project-id",
-    appId: "1:1234567891011:android:f93747b2261218f38f7c6c",
-    userId: "user123456789",
+  const keyfilePath = await getCredentialPath();
+
+  const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+    keyFile: keyfilePath,
+    projectId: PROJECT_ID,
   });
 
-  console.log(deleteRequest);
-}
+  const issueDetails = await getIssue(firebaseCrashlytics, {
+    appId: APP_ID,
+    issueId: ISSUE_ID,
+  });
 
-main();
+  console.log(issueDetails);
+}
 ```
 
 outputs
 
-```
-{ targetCompleteTime: '2025-02-20T23:15:57.392034Z' }
+```json
+{
+  "id": "ISSUE_ID",
+  "title": "APP_PACKAGE_NAME.ComposableSingletons$MainActivityKt$lambda-2$1.invoke$lambda$1$lambda$0",
+  "subtitle": "java.lang.RuntimeException - Test Crash",
+  "errorType": "FATAL",
+  "sampleEvent": "projects/PROJECT_NUMBER/apps/APP_ID/events/EVENT_ID",
+  "uri": "https://console.firebase.google.com/project/PROJECT_ID/crashlytics/app/android:APP_PACKAGE_NAME/issues/ISSUE_ID?&time=last-ninety-days",
+  "firstSeenVersion": "1.0",
+  "lastSeenVersion": "1.0",
+  "signals": [
+    {
+      "signal": "SIGNAL_FRESH",
+      "description": "This issue first appeared 3 days ago."
+    }
+  ],
+  "state": "MUTED",
+  "notesCount": "1",
+  "name": "projects/PROJECT_NUMBER/apps/APP_ID/issues/ISSUE_ID",
+  "variants": [
+    {
+      "id": "64ce7b28f09448b6bfbcb581314bbbcd",
+      "sampleEvent": "projects/PROJECT_NUMBER/apps/APP_ID/events/EVENT_ID",
+      "uri": "https://console.firebase.google.com/project/PROJECT_ID/crashlytics/app/android:APP_PACKAGE_NAME/issues/ISSUE_ID?&time=last-ninety-days&subIssues=64ce7b28f09448b6bfbcb581314bbbcd"
+    }
+  ]
+}
 ```
 
 ## Ways to authenticate request
@@ -50,9 +78,7 @@ outputs
 Just provide the path to your `service-account` file
 
 ```js
-const firebaseCrashlytics = new FirebaseCrashlytics({
-  keyFile: "./service-account.json",
-});
+// TODO: ADD SAMPLE HERE
 ```
 
 ### Using service-account credentials
@@ -60,19 +86,5 @@ const firebaseCrashlytics = new FirebaseCrashlytics({
 Just provide the JSON object of your `service-account` credentials
 
 ```js
-const firebaseCrashlytics = new FirebaseCrashlytics({
-  credentials: {
-    type: "service_account",
-    project_id: "<PROJECT_ID>",
-    private_key_id: "<PRIVATE_KEY_ID>",
-    private_key: "<PRIVATE_KEY>",
-    client_email: "<CLIENT_EMAIL>",
-    client_id: "<CLIENT_ID>",
-    auth_uri: "<AUTH_URI>",
-    token_uri: "<TOKEN_URI>",
-    auth_provider_x509_cert_url: "<AUTH_PROVIDER_X509_CERT_URL>",
-    client_x509_cert_url: "<CLIENT_X509_CERT_URL>",
-    universe_domain: "<UNIVERSE_DOMAIN>",
-  },
-});
+// TODO: ADD SAMPLE HERE
 ```
