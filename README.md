@@ -19,6 +19,41 @@ npm i firebase-crashlytics
 
 ### Code example
 
+#### Deleting crash reports of a specific user
+
+```ts
+import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
+import { deleteCrashReport } from "firebase-crashlytics/delete-crash-report";
+
+async function main() {
+  const keyfilePath = await getCredentialPath();
+
+  const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+    keyFile: keyfilePath,
+    projectId: PROJECT_ID,
+  });
+
+  const deleteResponse = await deleteCrashReport(firebaseCrashlytics, {
+    appId: APP_ID,
+    userId: USER_ID,
+  });
+
+  console.log(deleteResponse);
+}
+
+main();
+```
+
+outputs
+
+```json
+{
+  "targetCompleteTime": "2026-04-09T20:52:13.909197Z"
+}
+```
+
+#### Getting issue data
+
 ```ts
 import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
 import { getIssue } from "firebase-crashlytics/issues";
@@ -77,8 +112,10 @@ outputs
 
 Just provide the path to your `service-account` file
 
-```js
-// TODO: ADD SAMPLE HERE
+```ts
+const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+  keyFile: keyfilePath,
+});
 ```
 
 ### Using service-account credentials
@@ -86,5 +123,19 @@ Just provide the path to your `service-account` file
 Just provide the JSON object of your `service-account` credentials
 
 ```js
-// TODO: ADD SAMPLE HERE
+const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+  credentials: {
+    type: "service_account",
+    project_id: "<PROJECT_ID>",
+    private_key_id: "<PRIVATE_KEY_ID>",
+    private_key: "<PRIVATE_KEY>",
+    client_email: "<CLIENT_EMAIL>",
+    client_id: "<CLIENT_ID>",
+    auth_uri: "<AUTH_URI>",
+    token_uri: "<TOKEN_URI>",
+    auth_provider_x509_cert_url: "<AUTH_PROVIDER_X509_CERT_URL>",
+    client_x509_cert_url: "<CLIENT_X509_CERT_URL>",
+    universe_domain: "<UNIVERSE_DOMAIN>",
+  },
+});
 ```
