@@ -122,7 +122,7 @@ const firebaseCrashlytics: FirebaseCrashlytics = initialize({
 
 Just provide the JSON object of your `service-account` credentials
 
-```js
+```ts
 const firebaseCrashlytics: FirebaseCrashlytics = initialize({
   credentials: {
     type: "service_account",
