@@ -22,18 +22,14 @@ npm i firebase-crashlytics
 #### Deleting crash reports of a specific user
 
 ```ts
-import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
-import { deleteCrashReport } from "firebase-crashlytics/delete-crash-report";
+import { FirebaseCrashlytics } from "firebase-crashlytics";
 
 async function main() {
-  const keyfilePath = await getCredentialPath();
-
-  const firebaseCrashlytics: FirebaseCrashlytics = initialize({
-    keyFile: keyfilePath,
-    projectId: PROJECT_ID,
+  const firebaseCrashlytics = new FirebaseCrashlytics({
+    keyFile: "./service-account.json",
   });
 
-  const deleteResponse = await deleteCrashReport(firebaseCrashlytics, {
+  const deleteResponse = await firebaseCrashlytics.users.deleteCrashReport({
     appId: APP_ID,
     userId: USER_ID,
   });
@@ -48,31 +44,29 @@ outputs
 
 ```json
 {
-  "targetCompleteTime": "2026-04-09T20:52:13.909197Z"
+  "targetCompleteTime": "2026-04-10T21:08:11.688025Z"
 }
 ```
 
 #### Getting issue data
 
 ```ts
-import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
-import { getIssue } from "firebase-crashlytics/issues";
+import { FirebaseCrashlytics } from "firebase-crashlytics";
 
 async function main() {
-  const keyfilePath = await getCredentialPath();
-
-  const firebaseCrashlytics: FirebaseCrashlytics = initialize({
-    keyFile: keyfilePath,
-    projectId: PROJECT_ID,
+  const firebaseCrashlytics = new FirebaseCrashlytics({
+    keyFile: "./service-account.json",
   });
 
-  const issueDetails = await getIssue(firebaseCrashlytics, {
+  const issueDetails = await firebaseCrashlytics.issues.get({
     appId: APP_ID,
     issueId: ISSUE_ID,
   });
 
   console.log(issueDetails);
 }
+
+main();
 ```
 
 outputs
@@ -93,7 +87,7 @@ outputs
       "description": "This issue first appeared 3 days ago."
     }
   ],
-  "state": "MUTED",
+  "state": "OPEN",
   "notesCount": "1",
   "name": "projects/PROJECT_NUMBER/apps/APP_ID/issues/ISSUE_ID",
   "variants": [
@@ -106,6 +100,37 @@ outputs
 }
 ```
 
+#### Updating issue state
+
+```ts
+import { FirebaseCrashlytics } from "firebase-crashlytics";
+
+async function main() {
+  const firebaseCrashlytics = new FirebaseCrashlytics({
+    keyFile: "./service-account.json",
+  });
+
+  const issueDetails = await firebaseCrashlytics.issues.update({
+    appId: APP_ID,
+    issueId: ISSUE_ID,
+    issueState: "OPEN",
+  });
+
+  console.log(issueDetails);
+}
+
+main();
+```
+
+outputs
+
+```json
+{
+  "state": "OPEN",
+  "name": "projects/PROJECT_ID/apps/APP_ID/issues/ISSUE_ID"
+}
+```
+
 ## Ways to authenticate request
 
 ### Using a service-account file
@@ -113,8 +138,8 @@ outputs
 Just provide the path to your `service-account` file
 
 ```ts
-const firebaseCrashlytics: FirebaseCrashlytics = initialize({
-  keyFile: keyfilePath,
+const firebaseCrashlytics = new FirebaseCrashlytics({
+  keyFile: "./service-account.json",
 });
 ```
 
@@ -123,7 +148,7 @@ const firebaseCrashlytics: FirebaseCrashlytics = initialize({
 Just provide the JSON object of your `service-account` credentials
 
 ```ts
-const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+const firebaseCrashlytics = new FirebaseCrashlytics({
   credentials: {
     type: "service_account",
     project_id: "<PROJECT_ID>",

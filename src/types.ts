@@ -22,7 +22,7 @@ export interface GetIssueParams {
 export interface UpdateIssueParams {
   appId: string;
   issueId: string;
-  issueState: State;
+  issueState: "OPEN" | "CLOSED" | "MUTED";
 }
 
 export interface UpdateIssueResponse {
