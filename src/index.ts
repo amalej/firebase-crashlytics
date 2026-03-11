@@ -39,6 +39,8 @@ export class FirebaseCrashlytics {
     if (typeof accessToken !== "string") {
       throw Error("Could not get access token");
     }
+
+    this.accessToken = accessToken;
     return accessToken;
   }
 
@@ -51,6 +53,8 @@ export class FirebaseCrashlytics {
     if (!projectId) {
       throw Error("Could not get project id");
     }
+
+    this.projectId = projectId;
     return projectId;
   }
 }
