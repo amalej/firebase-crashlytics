@@ -19,19 +19,26 @@ npm i firebase-crashlytics
 
 ### Code example
 
-```js
-const firebaseCrashlytics = new FirebaseCrashlytics({
-  keyFile: "./service-account.json",
-});
+#### Deleting crash reports of a specific user
+
+```ts
+import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
+import { deleteCrashReport } from "firebase-crashlytics/delete-crash-report";
 
 async function main() {
-  const deleteRequest = await firebaseCrashlytics.deleteCrashReport({
-    projectId: "firebase-project-id",
-    appId: "1:1234567891011:android:f93747b2261218f38f7c6c",
-    userId: "user123456789",
+  const keyfilePath = await getCredentialPath();
+
+  const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+    keyFile: keyfilePath,
+    projectId: PROJECT_ID,
   });
 
-  console.log(deleteRequest);
+  const deleteResponse = await deleteCrashReport(firebaseCrashlytics, {
+    appId: APP_ID,
+    userId: USER_ID,
+  });
+
+  console.log(deleteResponse);
 }
 
 main();
@@ -39,8 +46,64 @@ main();
 
 outputs
 
+```json
+{
+  "targetCompleteTime": "2026-04-09T20:52:13.909197Z"
+}
 ```
-{ targetCompleteTime: '2025-02-20T23:15:57.392034Z' }
+
+#### Getting issue data
+
+```ts
+import { initialize, type FirebaseCrashlytics } from "firebase-crashlytics";
+import { getIssue } from "firebase-crashlytics/issues";
+
+async function main() {
+  const keyfilePath = await getCredentialPath();
+
+  const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+    keyFile: keyfilePath,
+    projectId: PROJECT_ID,
+  });
+
+  const issueDetails = await getIssue(firebaseCrashlytics, {
+    appId: APP_ID,
+    issueId: ISSUE_ID,
+  });
+
+  console.log(issueDetails);
+}
+```
+
+outputs
+
+```json
+{
+  "id": "ISSUE_ID",
+  "title": "APP_PACKAGE_NAME.ComposableSingletons$MainActivityKt$lambda-2$1.invoke$lambda$1$lambda$0",
+  "subtitle": "java.lang.RuntimeException - Test Crash",
+  "errorType": "FATAL",
+  "sampleEvent": "projects/PROJECT_NUMBER/apps/APP_ID/events/EVENT_ID",
+  "uri": "https://console.firebase.google.com/project/PROJECT_ID/crashlytics/app/android:APP_PACKAGE_NAME/issues/ISSUE_ID?&time=last-ninety-days",
+  "firstSeenVersion": "1.0",
+  "lastSeenVersion": "1.0",
+  "signals": [
+    {
+      "signal": "SIGNAL_FRESH",
+      "description": "This issue first appeared 3 days ago."
+    }
+  ],
+  "state": "MUTED",
+  "notesCount": "1",
+  "name": "projects/PROJECT_NUMBER/apps/APP_ID/issues/ISSUE_ID",
+  "variants": [
+    {
+      "id": "64ce7b28f09448b6bfbcb581314bbbcd",
+      "sampleEvent": "projects/PROJECT_NUMBER/apps/APP_ID/events/EVENT_ID",
+      "uri": "https://console.firebase.google.com/project/PROJECT_ID/crashlytics/app/android:APP_PACKAGE_NAME/issues/ISSUE_ID?&time=last-ninety-days&subIssues=64ce7b28f09448b6bfbcb581314bbbcd"
+    }
+  ]
+}
 ```
 
 ## Ways to authenticate request
@@ -49,9 +112,9 @@ outputs
 
 Just provide the path to your `service-account` file
 
-```js
-const firebaseCrashlytics = new FirebaseCrashlytics({
-  keyFile: "./service-account.json",
+```ts
+const firebaseCrashlytics: FirebaseCrashlytics = initialize({
+  keyFile: keyfilePath,
 });
 ```
 
@@ -59,8 +122,8 @@ const firebaseCrashlytics = new FirebaseCrashlytics({
 
 Just provide the JSON object of your `service-account` credentials
 
-```js
-const firebaseCrashlytics = new FirebaseCrashlytics({
+```ts
+const firebaseCrashlytics: FirebaseCrashlytics = initialize({
   credentials: {
     type: "service_account",
     project_id: "<PROJECT_ID>",
